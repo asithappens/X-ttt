@@ -7,6 +7,24 @@ import TweenMax from 'gsap'
 import rand_arr_elem from '../../helpers/rand_arr_elem'
 import rand_to_fro from '../../helpers/rand_to_fro'
 
+const getInitialState = (gameType) => {
+	if (gameType === 'live') {
+		return {
+			cell_vals: {},
+			next_turn_ply: true,
+			game_play: false,
+			game_stat: 'Connecting'
+		}
+	}
+
+	return {
+		cell_vals: {},
+		next_turn_ply: true,
+		game_play: true,
+		game_stat: 'Start game'
+	}
+}
+
 export default class SetName extends Component {
 
 	constructor (props) {
@@ -26,23 +44,11 @@ export default class SetName extends Component {
 		]
 
 
-		if (this.props.game_type != 'live')
-			this.state = {
-				cell_vals: {},
-				next_turn_ply: true,
-				game_play: true,
-				game_stat: 'Start game'
-			}
-		else {
+		if (this.props.game_type !== 'live') {
 			this.sock_start()
-
-			this.state = {
-				cell_vals: {},
-				next_turn_ply: true,
-				game_play: false,
-				game_stat: 'Connecting'
-			}
 		}
+
+		this.state = getInitialState(this.props.game_type)
 	}
 
 //	------------------------	------------------------	------------------------
@@ -141,7 +147,8 @@ export default class SetName extends Component {
 					</table>
 				</div>
 
-				<button type='submit' onClick={this.end_game.bind(this)} className='button'><span>End Game <span className='fa fa-caret-right'></span></span></button>
+				<button type='submit' onClick={this.end_game.bind(this)} className='button margin-right'><span>End Game <span className='fa fa-caret-right'></span></span></button>
+				<button type='submit' onClick={this.play_again.bind(this)} className='button'><span>Play Again <span className='fa fa-caret-right'></span></span></button>
 
 			</div>
 		)
@@ -336,6 +343,17 @@ export default class SetName extends Component {
 		this.socket && this.socket.disconnect();
 
 		this.props.onEndGame()
+	}
+	
+//	------------------------	------------------------	------------------------
+
+	play_again () {
+		this.setState(getInitialState())
+
+		// Ensure 'win' ui is reset
+		this.win_sets.forEach((winSet) => {
+			winSet.forEach((winSquare) => this.refs[winSquare].classList.remove('win'))
+		})
 	}
 
 
